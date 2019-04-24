@@ -4,7 +4,7 @@ import re
 from pythainlp.corpus.common import thai_words
 from pythainlp.tokenize import word_tokenize
 
-s_chars_pattern = re.compile(r"[\"#$%&\'()*+,-./:;<=>?@[\\\]^_`{\|}~“”]")
+s_chars_pattern = re.compile(r"[\"#$%&\'()*+,-./:;<=>?@[\\\]^_`{\|}~“”!]")
 
 def break_english(s, pattern=s_chars_pattern):
     for i in range(len(s)):
