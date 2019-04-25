@@ -1,0 +1,6 @@
+keras
+matplotlib
+numpy
+pythainlp               == 2.0.4
+sklearn
+tensorflow-gpu
