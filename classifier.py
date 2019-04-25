@@ -8,7 +8,7 @@ from keras.utils import to_categorical
 import matplotlib.pyplot as plt
 import utitlities as utils
 
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix, f1_score
 
 def attention_layer(inputs, time_step, single_att_vec=0):
     a = Lambda(lambda x: x, output_shape=lambda s: s)(inputs)
@@ -17,6 +17,9 @@ def attention_layer(inputs, time_step, single_att_vec=0):
     a_probs = Permute((2, 1))(a)
     output_attention_mul = multiply([inputs, a_probs])
     return output_attention_mul
+
+def f1(y_actual, y_predict, average='macro'):
+    return f1_score(y_actual, y_predict, average=average)
 
 if __name__ == "__main__":
     labels = np.array(utils.get_sentence_labels())
@@ -71,7 +74,7 @@ if __name__ == "__main__":
 
     loaded = 0
     if(not(loaded)):
-        model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy', 'mae'])
+        model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy', f1, 'mae'])
     
     history = model.fit(wv, to_categorical(labels, num_classes=3), batch_size=wv.shape[0], epochs=256, validation_split=.2)
     
