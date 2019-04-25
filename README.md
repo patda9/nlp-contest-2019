@@ -13,5 +13,5 @@ pip install -r requirements.txt
 |**Person**         |              -|  8     |   145|      13|
 |**Mountain**       |              -|  9     |    18|     135|
 ### Average F1 score
-![Average F1 Score](/result/charts/f1_score2019-04-25 18-05-48.446177.png)
+![Average F1 Score](/result/charts/f1_score2019-04-25 18-05-48.446177.png?raw=true)
 ---
