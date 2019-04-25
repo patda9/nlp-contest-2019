@@ -13,5 +13,5 @@ pip install -r requirements.txt
 |**Person**         |              -|  8     |   145|      13|
 |**Mountain**       |              -|  9     |    18|     135|
 ### Average F1 score
-![Average F1 Score](https://drive.google.com/file/d/1A4VAQBEHZgsj194W1NgegK6dRRxBihPZ/view?usp=sharing)
+![Average F1 Score](https://ibb.co/zJwHhbP)
 ---
