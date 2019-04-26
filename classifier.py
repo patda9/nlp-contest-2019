@@ -1,6 +1,6 @@
 import numpy as np
+import keras.backend as K
 
-from keras.backend import mean
 from keras.layers import BatchNormalization, Bidirectional, Dense, Flatten, GRU, Input, Lambda, Masking, multiply, Permute, RepeatVector
 from keras.models import Model
 from keras.utils import to_categorical
@@ -8,7 +8,7 @@ from keras.utils import to_categorical
 import matplotlib.pyplot as plt
 import utitlities as utils
 
-from sklearn.metrics import confusion_matrix, f1_score
+from sklearn.metrics import confusion_matrix
 
 def attention_layer(inputs, time_step, single_att_vec=0):
     a = Lambda(lambda x: x, output_shape=lambda s: s)(inputs)
@@ -18,8 +18,20 @@ def attention_layer(inputs, time_step, single_att_vec=0):
     output_attention_mul = multiply([inputs, a_probs])
     return output_attention_mul
 
-def f1(y_actual, y_predict, average='macro'):
-    return f1_score(y_actual, y_predict, average=average)
+def f1_score(y_true, y_pred):
+    c1 = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
+    c2 = K.sum(K.round(K.clip(y_pred, 0, 1)))
+    c3 = K.sum(K.round(K.clip(y_true, 0, 1)))
+
+    if c3 == 0:
+        return 0
+
+    precision = c1 / c2
+    recall = c1 / c3
+
+    f1_score = 2 * (precision * recall) / (precision + recall)
+
+    return np.nan_to_num(f1_score)
 
 if __name__ == "__main__":
     labels = np.array(utils.get_sentence_labels())
@@ -74,9 +86,9 @@ if __name__ == "__main__":
 
     loaded = 0
     if(not(loaded)):
-        model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy', f1, 'mae'])
+        model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy', f1_score, 'mae'])
     
-    history = model.fit(wv, to_categorical(labels, num_classes=3), batch_size=wv.shape[0], epochs=256, validation_split=.2)
+    history = model.fit(wv, to_categorical(labels, num_classes=3), batch_size=wv.shape[0], epochs=64, validation_split=.2)
     
     from datetime import datetime
     tsp = datetime.now()
@@ -96,10 +108,26 @@ if __name__ == "__main__":
         for i in range(predictions.shape[0]):
             f.writelines('s:%s, l:%s, pred:%s/n' % (verifying_s[i], y_test[i], predictions[i]))
 
-    plt.plot(history.history['acc'])
-    plt.plot(history.history['val_acc'])
+    plt.plot(history.history['acc'], label='training')
+    plt.plot(history.history['val_acc'], '-r', label='validation')
+    plt.legend(loc='best')
+    plt.ylim(0, 1)
+    plt.xlabel('epochs')
+    plt.ylabel('accuracy')
     plt.show()
 
-    plt.plot(history.history['loss'])
-    plt.plot(history.history['val_loss'])
+    plt.plot(history.history['loss'], label='training')
+    plt.plot(history.history['val_loss'], '-r', label='validation')
+    plt.legend(loc='best')
+    plt.xlabel('epochs')
+    plt.ylabel('loss')
+    plt.show()
+
+    plt.plot(history.history['f1_score'], label='training')
+    plt.plot(history.history['val_f1_score'], '-r', label='validation')
+    plt.legend(loc='best')
+    plt.ylim(0, 1)
+    plt.xlabel('epochs')
+    plt.ylabel('f1 score')
+    plt.savefig('./result/charts/f1_score%s.png' % tsp)
     plt.show()
