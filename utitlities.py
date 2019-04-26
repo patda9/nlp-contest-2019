@@ -1,6 +1,8 @@
 import json
 import re
 
+import numpy as np
+
 from pythainlp.corpus.common import thai_words
 from pythainlp.tokenize import word_tokenize
 
@@ -29,9 +31,9 @@ def break_english(s, pattern=s_chars_pattern):
                 break
     return s
 
-def get_dataset(path='./dataset/'):
-    c_file = open('%sans.txt' % (path))
-    s_file = open('%sinput.txt' % (path), encoding='utf-8-sig')
+def get_dataset(l='', path='./dataset/', s=''):
+    c_file = open('%s%s' % (path, l))
+    s_file = open('%s%s' % (path, s), encoding='utf-8-sig')
 
     classes = []
     for line in c_file:
@@ -85,11 +87,45 @@ def tokenize_sentence(s):
     
     return tkned_s
 
-def vectorize_token():
-    pass
+def vectorize_tokens(sentences, return_vocab_wvs=0, wv_path='D:/Users/Patdanai/th-qasys-db/fasttext_model/cc.th.300.vec', verbose=0):
+    wv_fp = open(wv_path, encoding='utf-8-sig')
+
+    MAX_SEQ_LENGTH = len(max(sentences, key=len))
+    wvl = 300
+    
+    vocabs = set([t for s in sentences for t in s])
+
+    count = 0
+    vocab_wvs = {}
+    for line in wv_fp:
+        if(count > 0):
+            line = line.split()
+            if(line[0] in vocabs):
+                if(verbose):
+                    print('found %s %s' % (line[0], count))
+                vocab_wvs[line[0]] = line[1:]
+        count += 1
+
+    wv = np.zeros((len(sentences), MAX_SEQ_LENGTH, wvl))
+
+    count = 0
+    for s in sentences:
+        t_count = 0
+        for t in s:
+            try:
+                wv[count, MAX_SEQ_LENGTH - 1 - t_count, :] = vocab_wvs[t]
+                t_count += 1
+            except:
+                pass
+        count += 1
+    
+    if(return_vocab_wvs):
+        return wv, vocab_wvs
+
+    return wv, None
 
 if __name__ == "__main__":
-    classes, sentences = get_dataset()
+    classes, sentences = get_dataset(l='ans.txt', s='input.txt')
 
     # write tokenized sentences file
     white_space_match = re.compile(r"[ \s]")
