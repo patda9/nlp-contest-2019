@@ -44,15 +44,17 @@ def get_additional_dataset(path='./dataset/additional_dataset/'):
     for name in files:
         f = open('%s%s' % (path, name), encoding='utf-8-sig')
         
+        line_count = 0
         for line in f:
             sentences.append(line)
+            line_count += 1
 
         if(name.find('horn') > -1):
-            c = np.zeros((len(sentences), 1))
+            c = np.zeros((line_count, 1))
         elif(name.find('person') > -1):
-            c = np.ones((len(sentences), 1))
+            c = np.ones((line_count, 1))
         elif(name.find('mountain') > -1):
-            c = np.ones((len(sentences), 1))
+            c = np.ones((line_count, 1))
 
         labels = np.concatenate((labels, c), axis=0)
             
@@ -196,7 +198,10 @@ if __name__ == "__main__":
         added_sentences[i] = break_english(added_sentences[i])
         added_sentences[i] = preprocess_sentence(added_sentences[i], pattern=white_space_match)
     added_sentences = [[t for t in s if t != ' '] for s in added_sentences]
-    
+
+    print(len(added_sentences))
+    print(added_labels.shape)
+
     f = open('./dataset/tokenized_additional_sentences/addtional_sentences.json', 'w', encoding='utf-8-sig')
     json.dump(added_sentences, f, ensure_ascii=0)
 
