@@ -119,10 +119,13 @@ def tokenize_sentence(s):
     
     return tkned_s
 
-def vectorize_tokens(sentences, return_vocab_wvs=0, wv_path='D:/Users/Patdanai/th-qasys-db/fasttext_model/cc.th.300.vec', verbose=0):
+def vectorize_tokens(sentences, max_seq_length=None, return_vocab_wvs=0, wv_path='D:/Users/Patdanai/th-qasys-db/fasttext_model/cc.th.300.vec', verbose=0):
     wv_fp = open(wv_path, encoding='utf-8-sig')
 
     MAX_SEQ_LENGTH = len(max(sentences, key=len))
+    if(max_seq_length):
+        MAX_SEQ_LENGTH = max_seq_length
+
     wvl = 300
     
     vocabs = set([t for s in sentences for t in s])
