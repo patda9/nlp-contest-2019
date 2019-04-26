@@ -33,14 +33,24 @@ def f1_score(y_true, y_pred):
 
     return np.nan_to_num(f1_score)
 
+WV_PATH = 'C:/Users/Patdanai/Desktop/261499-nlp/lab/cc.th.300.vec'
+
 if __name__ == "__main__":
     labels = np.array(utils.get_sentence_labels())
     sentences = utils.get_tkned_sentences()
+    print(len(sentences), labels.shape)
+
+    additional_labels = np.array(utils.get_sentence_labels('./dataset/tokenized_additional_sentences/additional_labels.txt'))
+    additional_sentences = utils.get_tkned_sentences('./dataset/tokenized_additional_sentences/addtional_sentences.json')
+
+    labels = np.concatenate((labels, additional_labels))
+    sentences += additional_sentences
+    print(len(sentences), labels.shape)
 
     MAX_SEQ_LENGTH = len(max(sentences, key=len))
     vocabs = set([t for s in sentences for t in s])
 
-    wv_fp = open('D:/Users/Patdanai/th-qasys-db/fasttext_model/cc.th.300.vec', encoding='utf-8-sig')
+    wv_fp = open(WV_PATH, encoding='utf-8-sig')
 
     count = 0
     vocab_wvs = {}
