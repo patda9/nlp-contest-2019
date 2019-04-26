@@ -55,6 +55,7 @@ def get_additional_dataset(path='./dataset/additional_dataset/'):
             c = np.ones((line_count, 1))
         elif(name.find('mountain') > -1):
             c = np.ones((line_count, 1))
+            c[:] = 2
 
         labels = np.concatenate((labels, c), axis=0)
             
