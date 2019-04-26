@@ -1,4 +1,5 @@
 import json
+import os
 import re
 
 import numpy as np
@@ -20,7 +21,11 @@ def break_english(s, pattern=s_chars_pattern):
                         pass
                     else:
                         c.encode(encoding='utf-8').decode('ascii')
-                        english_chars += c
+                        
+                        if(c == ' '):
+                            pass
+                        else:
+                            english_chars += c
                 except UnicodeDecodeError:
                     pass
 
@@ -30,6 +35,28 @@ def break_english(s, pattern=s_chars_pattern):
                 s.insert(i + 1, english_chars)
                 break
     return s
+
+def get_additional_dataset(path='./dataset/additional_dataset/'):
+    files = os.listdir(path)
+
+    labels = np.empty((0, 1))
+    sentences = []
+    for name in files:
+        f = open('%s%s' % (path, name), encoding='utf-8-sig')
+        
+        for line in f:
+            sentences.append(line)
+
+        if(name.find('horn') > -1):
+            c = np.zeros((len(sentences), 1))
+        elif(name.find('person') > -1):
+            c = np.ones((len(sentences), 1))
+        elif(name.find('mountain') > -1):
+            c = np.ones((len(sentences), 1))
+
+        labels = np.concatenate((labels, c), axis=0)
+            
+    return labels, sentences
 
 def get_dataset(l='', path='./dataset/', s=''):
     c_file = open('%s%s' % (path, l))
@@ -68,6 +95,8 @@ def preprocess_sentence(s, pattern=s_chars_pattern):
                 c = ' '
             if(not(c in matched_chars)):
                 prep_s += c
+            elif(prep_s and c in [' ', '.']):
+                prep_s += c
     elif(type(s) == type([])):
         prep_s = []
         for i in range(len(s)):
@@ -77,6 +106,9 @@ def preprocess_sentence(s, pattern=s_chars_pattern):
                 for c in t:
                     if(not(c in matched_chars)):
                         prep_t += c
+                    elif(c in [' ', '.']):
+                        prep_t += c
+            
             if(prep_t):
                 prep_s.append(prep_t)
 
@@ -127,13 +159,14 @@ def vectorize_tokens(sentences, return_vocab_wvs=0, wv_path='D:/Users/Patdanai/t
 if __name__ == "__main__":
     classes, sentences = get_dataset(l='ans.txt', s='input.txt')
 
-    # write tokenized sentences file
+    # # write tokenized sentences file
     white_space_match = re.compile(r"[ \s]")
     for i in range(len(sentences)):
         sentences[i] = preprocess_sentence(sentences[i])
         sentences[i] = tokenize_sentence(sentences[i])
         sentences[i] = break_english(sentences[i])
         sentences[i] = preprocess_sentence(sentences[i], pattern=white_space_match)
+    sentences = [[t for t in s if t != ' '] for s in sentences]
 
     f = open('./dataset/tokenized_dataset/sentences.json', 'w', encoding='utf-8-sig')
     json.dump(sentences, f, ensure_ascii=0)
@@ -151,3 +184,18 @@ if __name__ == "__main__":
 
     f = open('./dataset/tokenized_dataset/labels.txt', 'w')
     json.dump(labels, f)
+
+    added_labels, added_sentences = get_additional_dataset()
+    
+    for i in range(len(added_sentences)):
+        added_sentences[i] = preprocess_sentence(added_sentences[i])
+        added_sentences[i] = tokenize_sentence(added_sentences[i])
+        added_sentences[i] = break_english(added_sentences[i])
+        added_sentences[i] = preprocess_sentence(added_sentences[i], pattern=white_space_match)
+    added_sentences = [[t for t in s if t != ' '] for s in added_sentences]
+    
+    f = open('./dataset/tokenized_additional_sentences/addtional_sentences.json', 'w', encoding='utf-8-sig')
+    json.dump(added_sentences, f, ensure_ascii=0)
+
+    f = open('./dataset/tokenized_additional_sentences/additional_labels.txt', 'w')
+    json.dump(list(added_labels.flatten()), f, ensure_ascii=0)
